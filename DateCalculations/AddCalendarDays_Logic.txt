@@ -1,0 +1,43 @@
+function addBusinessDays(startDate, numDays)
+{
+    Date newDate = startDate;
+    while (numDays > 0)
+    {
+         newDate.addDays(1);
+         if (newDate.isWeekend() || newDate.isHoliday())
+             continue;
+
+         numDays -= 1;
+    }
+    return newDate;
+}
+
+--------------------------------------------------------------------
+
+Public Shared Function AddBusinessDays(ByVal startDate As DateTime, _
+                                       ByVal businessDays As Integer) As DateTime
+    Dim di As Integer
+    Dim calendarDays As Integer
+
+    '''di: shift to Friday. If it's Sat or Sun don't shift'
+    di = (businessDays - Math.Max(0, (5 - startDate.DayOfWeek)))
+
+    ''' Start = Friday -> add di/5 weeks -> end = Friday'
+    ''' -> if the the remaining (<5 days) is > 0: add it + 2 days (Sat+Sun)'
+    ''' -> shift back to initial day'
+    calendarDays = ((((di / 5) * 7) _
+                   + IIf(((di Mod 5) <> 0), (2 + (di Mod 5)), 0)) _
+                   + (5 - startDate.DayOfWeek))
+
+    Return startDate.AddDays(CDbl(calendarDays))
+
+End Function
+
+---------------------------------------------------------------------------
+
+dayOfWeek = startDate.DayOfWeek
+    weekendDays = 2 * Math.Floor((dayOfWeek + businessDays - 0.1) / 5)
+    newDate = startDate.AddDays(businessDays + weekendDays)
+The second line computes the number of full weekends that we have to add and then multiplies them by 2 to obtain the number of days.
+
+The additional -0.1 constant is used to avoid adding days if (dayOfWeek + businessDays) is multiple of 5, and final date is friday.
